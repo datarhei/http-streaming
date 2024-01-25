@@ -1,4 +1,4 @@
-import TransmuxWorker from 'worker!./transmuxer-worker.js';
+import TransmuxWorker from "worker!./transmuxer-worker.js";
 
 export const handleData_ = (event, transmuxedData, callback) => {
   const {
@@ -8,17 +8,17 @@ export const handleData_ = (event, transmuxedData, callback) => {
     captionStreams,
     metadata,
     videoFrameDtsTime,
-    videoFramePtsTime
+    videoFramePtsTime,
   } = event.data.segment;
 
   transmuxedData.buffer.push({
     captions,
     captionStreams,
-    metadata
+    metadata,
   });
 
   const boxes = event.data.segment.boxes || {
-    data: event.data.segment.data
+    data: event.data.segment.data,
   };
 
   const result = {
@@ -33,24 +33,21 @@ export const handleData_ = (event, transmuxedData, callback) => {
       initSegment.data,
       initSegment.byteOffset,
       initSegment.byteLength
-    )
+    ),
   };
 
-  if (typeof videoFrameDtsTime !== 'undefined') {
+  if (typeof videoFrameDtsTime !== "undefined") {
     result.videoFrameDtsTime = videoFrameDtsTime;
   }
 
-  if (typeof videoFramePtsTime !== 'undefined') {
+  if (typeof videoFramePtsTime !== "undefined") {
     result.videoFramePtsTime = videoFramePtsTime;
   }
 
   callback(result);
 };
 
-export const handleDone_ = ({
-  transmuxedData,
-  callback
-}) => {
+export const handleDone_ = ({ transmuxedData, callback }) => {
   // Previously we only returned data on data events,
   // not on done events. Clear out the buffer to keep that consistent.
   transmuxedData.buffer = [];
@@ -82,10 +79,10 @@ export const processTransmux = (options) => {
     onDone,
     onEndedTimeline,
     onTransmuxerLog,
-    isEndOfTimeline
+    isEndOfTimeline,
   } = options;
   const transmuxedData = {
-    buffer: []
+    buffer: [],
   };
   let waitForEndedTimelineEvent = isEndOfTimeline;
 
@@ -95,43 +92,43 @@ export const processTransmux = (options) => {
       return;
     }
 
-    if (event.data.action === 'data') {
+    if (event.data.action === "data") {
       handleData_(event, transmuxedData, onData);
     }
-    if (event.data.action === 'trackinfo') {
+    if (event.data.action === "trackinfo") {
       onTrackInfo(event.data.trackInfo);
     }
-    if (event.data.action === 'gopInfo') {
+    if (event.data.action === "gopInfo") {
       handleGopInfo_(event, transmuxedData);
     }
-    if (event.data.action === 'audioTimingInfo') {
+    if (event.data.action === "audioTimingInfo") {
       onAudioTimingInfo(event.data.audioTimingInfo);
     }
-    if (event.data.action === 'videoTimingInfo') {
+    if (event.data.action === "videoTimingInfo") {
       onVideoTimingInfo(event.data.videoTimingInfo);
     }
-    if (event.data.action === 'videoSegmentTimingInfo') {
+    if (event.data.action === "videoSegmentTimingInfo") {
       onVideoSegmentTimingInfo(event.data.videoSegmentTimingInfo);
     }
-    if (event.data.action === 'audioSegmentTimingInfo') {
+    if (event.data.action === "audioSegmentTimingInfo") {
       onAudioSegmentTimingInfo(event.data.audioSegmentTimingInfo);
     }
-    if (event.data.action === 'id3Frame') {
+    if (event.data.action === "id3Frame") {
       onId3([event.data.id3Frame], event.data.id3Frame.dispatchType);
     }
-    if (event.data.action === 'caption') {
+    if (event.data.action === "caption") {
       onCaptions(event.data.caption);
     }
-    if (event.data.action === 'endedtimeline') {
+    if (event.data.action === "endedtimeline") {
       waitForEndedTimelineEvent = false;
       onEndedTimeline();
     }
-    if (event.data.action === 'log') {
+    if (event.data.action === "log") {
       onTransmuxerLog(event.data.log);
     }
 
     // wait for the transmuxed event since we may have audio and video
-    if (event.data.type !== 'transmuxed') {
+    if (event.data.type !== "transmuxed") {
       return;
     }
 
@@ -146,7 +143,7 @@ export const processTransmux = (options) => {
     transmuxer.onmessage = null;
     handleDone_({
       transmuxedData,
-      callback: onDone
+      callback: onDone,
     });
 
     /* eslint-disable no-use-before-define */
@@ -158,23 +155,23 @@ export const processTransmux = (options) => {
 
   if (audioAppendStart) {
     transmuxer.postMessage({
-      action: 'setAudioAppendStart',
-      appendStart: audioAppendStart
+      action: "setAudioAppendStart",
+      appendStart: audioAppendStart,
     });
   }
 
   // allow empty arrays to be passed to clear out GOPs
   if (Array.isArray(gopsToAlignWith)) {
     transmuxer.postMessage({
-      action: 'alignGopsWith',
-      gopsToAlignWith
+      action: "alignGopsWith",
+      gopsToAlignWith,
     });
   }
 
-  if (typeof remux !== 'undefined') {
+  if (typeof remux !== "undefined") {
     transmuxer.postMessage({
-      action: 'setRemux',
-      remux
+      action: "setRemux",
+      remux,
     });
   }
 
@@ -184,7 +181,7 @@ export const processTransmux = (options) => {
 
     transmuxer.postMessage(
       {
-        action: 'push',
+        action: "push",
         // Send the typed-array of data as an ArrayBuffer so that
         // it can be sent as a "Transferable" and avoid the costly
         // memory copy
@@ -192,25 +189,25 @@ export const processTransmux = (options) => {
         // To recreate the original typed-array, we need information
         // about what portion of the ArrayBuffer it was a view into
         byteOffset,
-        byteLength: bytes.byteLength
+        byteLength: bytes.byteLength,
       },
-      [ buffer ]
+      [buffer]
     );
   }
 
   if (isEndOfTimeline) {
-    transmuxer.postMessage({ action: 'endTimeline' });
+    transmuxer.postMessage({ action: "endTimeline" });
   }
   // even if we didn't push any bytes, we have to make sure we flush in case we reached
   // the end of the segment
-  transmuxer.postMessage({ action: 'flush' });
+  transmuxer.postMessage({ action: "flush" });
 };
 
 export const dequeue = (transmuxer) => {
   transmuxer.currentTransmux = null;
   if (transmuxer.transmuxQueue.length) {
     transmuxer.currentTransmux = transmuxer.transmuxQueue.shift();
-    if (typeof transmuxer.currentTransmux === 'function') {
+    if (typeof transmuxer.currentTransmux === "function") {
       transmuxer.currentTransmux();
     } else {
       processTransmux(transmuxer.currentTransmux);
@@ -233,11 +230,11 @@ export const enqueueAction = (action, transmuxer) => {
 };
 
 export const reset = (transmuxer) => {
-  enqueueAction('reset', transmuxer);
+  enqueueAction("reset", transmuxer);
 };
 
 export const endTimeline = (transmuxer) => {
-  enqueueAction('endTimeline', transmuxer);
+  enqueueAction("endTimeline", transmuxer);
 };
 
 export const transmux = (options) => {
@@ -262,7 +259,7 @@ export const createTransmuxer = (options) => {
     return term.call(transmuxer);
   };
 
-  transmuxer.postMessage({action: 'init', options});
+  transmuxer.postMessage({ action: "init", options });
 
   return transmuxer;
 };
@@ -271,5 +268,5 @@ export default {
   reset,
   endTimeline,
   transmux,
-  createTransmuxer
+  createTransmuxer,
 };
