@@ -512,7 +512,7 @@ const handleSegmentBytes = ({
 
             // Run through the CaptionParser in case there are captions.
             // Initialize CaptionParser if it hasn't been yet
-            if (!tracks.video || !data.byteLength || !segment.transmuxer) {
+            if (!tracks.video || !emsgData.byteLength || !segment.transmuxer) {
               finishLoading(undefined, id3Frames);
               return;
             }
@@ -1020,6 +1020,7 @@ export const mediaSegmentRequest = ({
     const keyRequestOptions = merge(xhrOptions, {
       uri: segment.key.resolvedUri,
       responseType: "arraybuffer",
+      requestType: "segment-key",
     });
     const keyRequestCallback = handleKeyResponse(
       segment,
@@ -1041,6 +1042,7 @@ export const mediaSegmentRequest = ({
       const mapKeyRequestOptions = merge(xhrOptions, {
         uri: segment.map.key.resolvedUri,
         responseType: "arraybuffer",
+        requestType: "segment-key",
       });
       const mapKeyRequestCallback = handleKeyResponse(
         segment,
@@ -1055,10 +1057,7 @@ export const mediaSegmentRequest = ({
       uri: segment.map.resolvedUri,
       responseType: "arraybuffer",
       headers: segmentXhrHeaders(segment.map),
-    });
-    const initSegmentRequestCallback = handleInitSegmentResponse({
-      segment,
-      finishProcessingFn,
+      requestType: "segment-media-initialization",
     });
     const initSegmentXhr = xhr(initSegmentOptions, initSegmentRequestCallback);
 
@@ -1069,6 +1068,7 @@ export const mediaSegmentRequest = ({
     uri: (segment.part && segment.part.resolvedUri) || segment.resolvedUri,
     responseType: "arraybuffer",
     headers: segmentXhrHeaders(segment),
+    requestType: "segment",
   });
 
   const segmentRequestCallback = handleSegmentResponse({

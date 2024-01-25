@@ -325,10 +325,7 @@ export default class DashPlaylistLoader extends EventTarget {
 
     // live playlist staleness timeout
     this.on('mediaupdatetimeout', () => {
-      // We handle live content steering in the playlist controller
-      if (!this.media().attributes.serviceLocation) {
-        this.refreshMedia_(this.media().id);
-      }
+      this.refreshMedia_(this.media().id);
     });
 
     this.state = 'HAVE_NOTHING';
@@ -639,7 +636,8 @@ export default class DashPlaylistLoader extends EventTarget {
   requestMain_(cb) {
     this.request = this.vhs_.xhr({
       uri: this.mainPlaylistLoader_.srcUrl,
-      withCredentials: this.withCredentials
+      withCredentials: this.withCredentials,
+      requestType: 'dash-manifest'
     }, (error, req) => {
       if (this.requestErrored_(error, req)) {
         if (this.state === 'HAVE_NOTHING') {
@@ -698,7 +696,8 @@ export default class DashPlaylistLoader extends EventTarget {
     this.request = this.vhs_.xhr({
       uri: resolveUrl(this.mainPlaylistLoader_.srcUrl, utcTiming.value),
       method: utcTiming.method,
-      withCredentials: this.withCredentials
+      withCredentials: this.withCredentials,
+      requestType: 'dash-clock-sync'
     }, (error, req) => {
       // disposed
       if (!this.request) {
@@ -925,6 +924,28 @@ export default class DashPlaylistLoader extends EventTarget {
       });
 
       this.addMetadataToTextTrack('EventStream', metadataArray, this.mainPlaylistLoader_.main.duration);
+    }
+  }
+
+  /**
+   * Returns the key ID set from a playlist
+   *
+   * @param {playlist} playlist to fetch the key ID set from.
+   * @return a Set of 32 digit hex strings that represent the unique keyIds for that playlist.
+   */
+  getKeyIdSet(playlist) {
+    if (playlist.contentProtection) {
+      const keyIds = new Set();
+
+      for (const keysystem in playlist.contentProtection) {
+        const defaultKID = playlist.contentProtection[keysystem].attributes['cenc:default_KID'];
+
+        if (defaultKID) {
+          // DASH keyIds are separated by dashes.
+          keyIds.add(defaultKID.replace(/-/g, '').toLowerCase());
+        }
+      }
+      return keyIds;
     }
   }
 }
