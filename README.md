@@ -56,6 +56,7 @@ Video.js Compatibility: 7.x, 8.x
       - [liveRangeSafeTimeDelta](#liverangesafetimedelta)
       - [useNetworkInformationApi](#usenetworkinformationapi)
       - [useDtsForTimestampOffset](#usedtsfortimestampoffset)
+      - [calculateTimestampOffsetForEachSegment](#calculatetimestampoffsetforeachsegment)
       - [useForcedSubtitles](#useforcedsubtitles)
       - [captionServices](#captionservices)
         - [Format](#format)
@@ -78,6 +79,7 @@ Video.js Compatibility: 7.x, 8.x
     - [Use Stats](#use-stats)
   - [In-Band Metadata](#in-band-metadata)
   - [Segment Metadata](#segment-metadata)
+  - [SEI Metadata](#sei-metadata)
   - [Object as Source](#object-as-source)
 - [Hosting Considerations](#hosting-considerations)
 - [Known Issues and Workarounds](#known-issues-and-workarounds)
@@ -98,9 +100,10 @@ Video.js Compatibility: 7.x, 8.x
 
 In most cases **it is not necessary to separately install http-streaming**, as it has been included in the default build of Video.js since version 7.
 
-Only install if you need a specifc combination of video.js and http-streaming versions. If installing separately, use the "core" version of Video.js without the bundled version of http-streaming. 
+Only install if you need a specifc combination of video.js and http-streaming versions. If installing separately, use the "core" version of Video.js without the bundled version of http-streaming.
 
 ### NPM
+
 To install `videojs-http-streaming` with npm, run
 
 ```bash
@@ -108,40 +111,45 @@ npm install --save @videojs/http-streaming
 ```
 
 ### CDN
+
 Select a version of VHS from the [CDN](https://unpkg.com/@videojs/http-streaming/dist/)
 
 ### Releases
+
 Download a release of [videojs-http-streaming](https://github.com/videojs/http-streaming/releases)
 
 ### Manual Build
+
 Download a copy of this git repository and then follow the steps in [Building](#building)
 
 ## Contributing
+
 See [CONTRIBUTING.md](/CONTRIBUTING.md)
 
 ## Troubleshooting
+
 See [our troubleshooting guide](/docs/troubleshooting.md)
 
 ## Talk to us
+
 Drop by the [Video.js slack][slack-link].
 
 ## Getting Started
+
 This library is included in Video.js 7 by default.
 
 **Only if need a specific combination of versions of Video.js and VHS** you can get a copy of [videojs-http-streaming](#installation) and include it in your page along with video.js. In this case, you should use the "core" build of Video.js, without a bundled VHS:
 
 ```html
-<video-js id=vid1 width=600 height=300 class="vjs-default-skin" controls>
-  <source
-     src="https://example.com/index.m3u8"
-     type="application/x-mpegURL">
+<video-js id="vid1" width="600" height="300" class="vjs-default-skin" controls>
+  <source src="https://example.com/index.m3u8" type="application/x-mpegURL" />
 </video-js>
 <!-- "core" version of Video.js -->
 <script src="video.core.min.js"></script>
 <script src="videojs-http-streaming.min.js"></script>
 <script>
-var player = videojs('vid1');
-player.play();
+  var player = videojs("vid1");
+  player.play();
 </script>
 ```
 
@@ -168,7 +176,7 @@ These browsers have some level of native HLS support, however by default the [ov
 - Mac Safari
 - iOS Safari
 
-Mac and iPad Safari do have MSE support, but native HLS is recommended 
+Mac and iPad Safari do have MSE support, but native HLS is recommended
 
 ### DRM
 
@@ -177,6 +185,7 @@ DRM is supported through [videojs-contrib-eme](https://github.com/videojs/videoj
 Detailed option information can be found in the [videojs-contrib-eme README](https://github.com/videojs/videojs-contrib-eme/blob/main/README.md).
 
 ## Documentation
+
 [HTTP Live Streaming](https://developer.apple.com/streaming/) (HLS) has
 become a de-facto standard for streaming video on mobile devices
 thanks to its native support on iOS and Android. There are a number of
@@ -234,9 +243,11 @@ For a more complete list of supported and missing features, refer to
 [this doc](docs/supported-features.md).
 
 ### Options
+
 #### How to use
 
 ##### Initialization
+
 You may pass in an options object to the hls source handler at player
 initialization. You can pass in options just like you would for other
 parts of video.js:
@@ -246,32 +257,34 @@ parts of video.js:
 videojs(video, {
   html5: {
     vhs: {
-      withCredentials: true
-    }
-  }
+      withCredentials: true,
+    },
+  },
 });
 ```
 
 ##### Source
+
 Some options, such as `withCredentials` can be passed in to vhs during
 `player.src`
 
 ```javascript
-
-var player = videojs('some-video-id');
+var player = videojs("some-video-id");
 
 player.src({
-  src: 'https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8',
-  type: 'application/x-mpegURL',
-  withCredentials: true
+  src: "https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8",
+  type: "application/x-mpegURL",
+  withCredentials: true,
 });
 ```
 
 #### List
+
 ##### withCredentials
-* Type: `boolean`
-* can be used as a source option
-* can be used as an initialization option
+
+- Type: `boolean`
+- can be used as a source option
+- can be used as an initialization option
 
 When the `withCredentials` property is set to `true`, all XHR requests for
 manifests and segments would have `withCredentials` set to `true` as well. This
@@ -284,8 +297,9 @@ See html5rocks's [article](http://www.html5rocks.com/en/tutorials/cors/)
 for more info.
 
 ##### useCueTags
-* Type: `boolean`
-* can be used as an initialization option
+
+- Type: `boolean`
+- can be used as an initialization option
 
 When the `useCueTags` property is set to `true,` a text track is created with
 label 'ad-cues' and kind 'metadata'. The track is then added to
@@ -293,41 +307,44 @@ label 'ad-cues' and kind 'metadata'. The track is then added to
 tracked by following the Video.js cue points API for text tracks. For example:
 
 ```javascript
-let textTracks = player.textTracks();
-let cuesTrack;
+let textTracks = player.textTracks();
+let cuesTrack;
 
 for (let i = 0; i < textTracks.length; i++) {
-  if (textTracks[i].label === 'ad-cues') {
-    cuesTrack = textTracks[i];
-  }
+  if (textTracks[i].label === "ad-cues") {
+    cuesTrack = textTracks[i];
+  }
 }
 
-cuesTrack.addEventListener('cuechange', function() {
-  let activeCues = cuesTrack.activeCues;
+cuesTrack.addEventListener("cuechange", function () {
+  let activeCues = cuesTrack.activeCues;
 
-  for (let i = 0; i < activeCues.length; i++) {
+  for (let i = 0; i < activeCues.length; i++) {
     let activeCue = activeCues[i];
 
-    console.log('Cue runs from ' + activeCue.startTime +
-                ' to ' + activeCue.endTime);
-  }
+    console.log(
+      "Cue runs from " + activeCue.startTime + " to " + activeCue.endTime
+    );
+  }
 });
 ```
 
 ##### parse708captions
-* Type: `boolean`
-* Default: `true`
-* can be used as an initialization option
+
+- Type: `boolean`
+- Default: `true`
+- can be used as an initialization option
 
 When set to `false`, 708 captions in the stream are not parsed and will not show up in text track lists or the captions menu.
 
 ##### overrideNative
-* Type: `boolean`
-* can be used as an initialization option
+
+- Type: `boolean`
+- can be used as an initialization option
 
 Try to use videojs-http-streaming even on platforms that provide some
 level of HLS support natively. There are a number of platforms that
-*technically* play back HLS content but aren't very reliable or are
+_technically_ play back HLS content but aren't very reliable or are
 missing features like CEA-608 captions support. When `overrideNative`
 is true, if the platform supports Media Source Extensions
 videojs-http-streaming will take over HLS playback to provide a more
@@ -335,22 +352,23 @@ consistent experience.
 
 ```javascript
 // via the constructor
-var player = videojs('playerId', {
+var player = videojs("playerId", {
   html5: {
     vhs: {
-      overrideNative: true
+      overrideNative: true,
     },
     nativeAudioTracks: false,
-    nativeVideoTracks: false
-  }
+    nativeVideoTracks: false,
+  },
 });
 ```
 
 Since MSE playback may be desirable on all browsers with some native support other than Safari, `overrideNative: !videojs.browser.IS_SAFARI` could be used.
 
 ##### playlistExclusionDuration
-* Type: `number`
-* can be used as an initialization option
+
+- Type: `number`
+- can be used as an initialization option
 
 When the `playlistExclusionDuration` property is set to a time duration in seconds,
 if a playlist is excluded, it will be excluded for a period of that
@@ -358,39 +376,44 @@ customized duration. This enables the exclusion duration to be configured
 by the user.
 
 ##### maxPlaylistRetries
-* Type: `number`
-* Default: `Infinity`
-* can be used as an initialization option
+
+- Type: `number`
+- Default: `Infinity`
+- can be used as an initialization option
 
 The max number of times that a playlist will retry loading following an error
 before being indefinitely excluded from the rendition selection algorithm. Note: the number of retry attempts needs to _exceed_ this value before a playlist will be excluded.
 
 ##### bandwidth
-* Type: `number`
-* can be used as an initialization option
+
+- Type: `number`
+- can be used as an initialization option
 
 When the `bandwidth` property is set (bits per second), it will be used in
 the calculation for initial playlist selection, before more bandwidth
 information is seen by the player.
 
 ##### useBandwidthFromLocalStorage
-* Type: `boolean`
-* can be used as an initialization option
+
+- Type: `boolean`
+- can be used as an initialization option
 
 If true, `bandwidth` and `throughput` values are stored in and retrieved from local
 storage on startup (for initial rendition selection). This setting is `false` by default.
 
 ##### enableLowInitialPlaylist
-* Type: `boolean`
-* can be used as an initialization option
+
+- Type: `boolean`
+- can be used as an initialization option
 
 When `enableLowInitialPlaylist` is set to true, it will be used to select
-the lowest bitrate playlist initially.  This helps to decrease playback start time.
+the lowest bitrate playlist initially. This helps to decrease playback start time.
 This setting is `false` by default.
 
 ##### limitRenditionByPlayerDimensions
-* Type: `boolean`
-* can be used as an initialization option
+
+- Type: `boolean`
+- can be used as an initialization option
 
 When `limitRenditionByPlayerDimensions` is set to true, rendition
 selection logic will take into account the player size and rendition
@@ -398,15 +421,17 @@ resolutions when making a decision.
 This setting is `true` by default.
 
 ##### useDevicePixelRatio
-* Type: `boolean`
-* can be used as an initialization option.
+
+- Type: `boolean`
+- can be used as an initialization option.
 
 If true, this will take the device pixel ratio into account when doing rendition switching. This means that if you have a player with the width of `540px` in a high density display with a device pixel ratio of 2, a rendition of `1080p` will be allowed.
 This setting is `false` by default.
 
 ##### allowSeeksWithinUnsafeLiveWindow
-* Type: `boolean`
-* can be used as a source option
+
+- Type: `boolean`
+- can be used as a source option
 
 When `allowSeeksWithinUnsafeLiveWindow` is set to `true`, if the active playlist is live
 and a seek is made to a time between the safe live point (end of manifest minus three
@@ -424,63 +449,72 @@ content.
 The property defaults to `false`.
 
 ##### customTagParsers
-* Type: `Array`
-* can be used as a source option
+
+- Type: `Array`
+- can be used as a source option
 
 With `customTagParsers` you can pass an array of custom m3u8 tag parser objects. See https://github.com/videojs/m3u8-parser#custom-parsers
 
 ##### customTagMappers
-* Type: `Array`
-* can be used as a source option
+
+- Type: `Array`
+- can be used as a source option
 
 Similar to `customTagParsers`, with `customTagMappers` you can pass an array of custom m3u8 tag mapper objects. See https://github.com/videojs/m3u8-parser#custom-parsers
 
 ##### cacheEncryptionKeys
-* Type: `boolean`
-* can be used as a source option
-* can be used as an initialization option
+
+- Type: `boolean`
+- can be used as a source option
+- can be used as an initialization option
 
 This option forces the player to cache AES-128 encryption keys internally instead of requesting the key alongside every segment request.
 This option defaults to `false`.
 
 ##### handlePartialData
-* Type: `boolean`,
-* Default: `false`
-* Use partial appends in the transmuxer and segment loader
+
+- Type: `boolean`,
+- Default: `false`
+- Use partial appends in the transmuxer and segment loader
 
 ##### liveRangeSafeTimeDelta
-* Type: `number`,
-* Default: [`SAFE_TIME_DELTA`](https://github.com/videojs/http-streaming/blob/e7cb63af010779108336eddb5c8fd138d6390e95/src/ranges.js#L17)
-* Allow to  re-define length (in seconds) of time delta when you compare current time and the end of the buffered range.
+
+- Type: `number`,
+- Default: [`SAFE_TIME_DELTA`](https://github.com/videojs/http-streaming/blob/e7cb63af010779108336eddb5c8fd138d6390e95/src/ranges.js#L17)
+- Allow to re-define length (in seconds) of time delta when you compare current time and the end of the buffered range.
 
 ##### useNetworkInformationApi
-* Type: `boolean`,
-* Default: `false`
-* Use [window.networkInformation.downlink](https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/downlink) to estimate the network's bandwidth. Per mdn, _The value is never greater than 10 Mbps, as a non-standard anti-fingerprinting measure_. Given this, if bandwidth estimates from both the player and networkInfo are >= 10 Mbps, the player will use the larger of the two values as its bandwidth estimate.
+
+- Type: `boolean`,
+- Default: `false`
+- Use [window.networkInformation.downlink](https://developer.mozilla.org/en-US/docs/Web/API/NetworkInformation/downlink) to estimate the network's bandwidth. Per mdn, _The value is never greater than 10 Mbps, as a non-standard anti-fingerprinting measure_. Given this, if bandwidth estimates from both the player and networkInfo are >= 10 Mbps, the player will use the larger of the two values as its bandwidth estimate.
 
 ##### useDtsForTimestampOffset
-* Type: `boolean`,
-* Default: `false`
-* Use [Decode Timestamp](https://www.w3.org/TR/media-source/#decode-timestamp) instead of [Presentation Timestamp](https://www.w3.org/TR/media-source/#presentation-timestamp) for [timestampOffset](https://www.w3.org/TR/media-source/#dom-sourcebuffer-timestampoffset) calculation. This option was introduced to align with DTS-based browsers. This option affects only transmuxed data (eg: transport stream). For more info please check the following [issue](https://github.com/videojs/http-streaming/issues/1247).  
+
+- Type: `boolean`,
+- Default: `false`
+- Use [Decode Timestamp](https://www.w3.org/TR/media-source/#decode-timestamp) instead of [Presentation Timestamp](https://www.w3.org/TR/media-source/#presentation-timestamp) for [timestampOffset](https://www.w3.org/TR/media-source/#dom-sourcebuffer-timestampoffset) calculation. This option was introduced to align with DTS-based browsers. This option affects only transmuxed data (eg: transport stream). For more info please check the following [issue](https://github.com/videojs/http-streaming/issues/1247).
 
 ##### calculateTimestampOffsetForEachSegment
-* Type: `boolean`,
-* Default: `false`
-* Calculate timestampOffset for each segment, regardless of its timeline. Sometimes it is helpful when you have corrupted DTS/PTS timestamps during discontinuities.
 
+- Type: `boolean`,
+- Default: `false`
+- Calculate timestampOffset for each segment, regardless of its timeline. Sometimes it is helpful when you have corrupted DTS/PTS timestamps during discontinuities.
 
 ##### useForcedSubtitles
-* Type: `boolean`
-* Default: `false`
-* can be used as a source option
-* can be used as an initialization option
+
+- Type: `boolean`
+- Default: `false`
+- can be used as a source option
+- can be used as an initialization option
 
 If true, this option allows the player to display forced subtitles. When available, forced subtitles allow to translate foreign language dialogues or images containing foreign language characters.
 
 ##### captionServices
-* Type: `object`
-* Default: undefined
-* Provide extra information, like a label or a language, for instream (608 and 708) captions.
+
+- Type: `object`
+- Default: undefined
+- Provide extra information, like a label or a language, for instream (608 and 708) captions.
 
 The captionServices options object has properties that map to the caption services. Each property is an object itself that includes several properties, like a label or language.
 
@@ -489,6 +523,7 @@ For 608 captions, the service names are `CC1`, `CC2`, `CC3`, and `CC4`. For 708 
 For 708 caption services, you may additionally provide an `encoding` value that will be used by the transmuxer to decode the captions using an instance of [TextDecoder](https://developer.mozilla.org/en-US/docs/Web/API/TextDecoder). This is to permit and is required for legacy multi-byte encodings. Please review the `TextDecoder` documentation for accepted encoding labels.
 
 ###### Format
+
 ```js
 {
   vhs: {
@@ -503,7 +538,9 @@ For 708 caption services, you may additionally provide an `encoding` value that 
   }
 }
 ```
+
 ###### Example
+
 ```js
 {
   vhs: {
@@ -524,6 +561,7 @@ For 708 caption services, you may additionally provide an `encoding` value that 
 ```
 
 ### Runtime Properties
+
 Runtime properties are attached to the tech object when HLS is in
 use. You can get a reference to the VHS source handler like this:
 
@@ -531,7 +569,7 @@ use. You can get a reference to the VHS source handler like this:
 var vhs = player.tech().vhs;
 ```
 
-If you *were* thinking about modifying runtime properties in a
+If you _were_ thinking about modifying runtime properties in a
 video.js plugin, we'd recommend you avoid it. Your plugin won't work
 with videos that don't use videojs-http-streaming and the best plugins
 work across all the media types that video.js supports. If you're
@@ -539,6 +577,7 @@ deploying videojs-http-streaming on your own website and want to make a
 couple tweaks though, go for it!
 
 #### vhs.playlists.main
+
 Type: `object`
 
 An object representing the parsed main playlist. If a media playlist
@@ -546,6 +585,7 @@ is loaded directly, a main playlist with only one entry will be
 created.
 
 #### vhs.playlists.media
+
 Type: `function`
 
 A function that can be used to retrieve or modify the currently active
@@ -559,6 +599,7 @@ playlist. Once it has been retreived, it will become the active media
 playlist.
 
 #### vhs.systemBandwidth
+
 Type: `number`
 
 `systemBandwidth` is a combination of two serial processes' bitrates. The first
@@ -571,6 +612,7 @@ Since the two process are serial, the overall system bandwidth is given by:
 `systemBandwidth = 1 / (1 / bandwidth + 1 / throughput)`
 
 #### vhs.bandwidth
+
 Type: `number`
 
 The number of bits downloaded per second in the last segment download.
@@ -582,11 +624,13 @@ this value as soon as the HLS tech has loaded to provide an initial
 bandwidth estimate.
 
 #### vhs.throughput
+
 Type: `number`
 
 The number of bits decrypted, transmuxed, and appended per second as a cumulative average across active processing time.
 
 #### vhs.selectPlaylist
+
 Type: `function`
 
 A function that returns the media playlist object to use to download
@@ -601,6 +645,7 @@ function below to selectively enable or disable a playlist from the
 adaptive streaming logic.
 
 #### vhs.representations
+
 Type: `function`
 
 It is recommended to include the [videojs-contrib-quality-levels](https://github.com/videojs/videojs-contrib-quality-levels) plugin to your page so that videojs-http-streaming will automatically populate the QualityLevelList exposed on the player by the plugin. You can access this list by calling `player.qualityLevels()`. See the [videojs-contrib-quality-levels project page](https://github.com/videojs/videojs-contrib-quality-levels) for more information on how to use the api.
@@ -631,16 +676,20 @@ To see whether the representation is enabled or disabled, call its `enabled()` m
 Example, only enabling representations with a width greater than or equal to 720:
 
 ```javascript
-player.tech().vhs.representations().forEach(function(rep) {
-  if (rep.width >= 720) {
-    rep.enabled(true);
-  } else {
-    rep.enabled(false);
-  }
-});
+player
+  .tech()
+  .vhs.representations()
+  .forEach(function (rep) {
+    if (rep.width >= 720) {
+      rep.enabled(true);
+    } else {
+      rep.enabled(false);
+    }
+  });
 ```
 
 #### vhs.xhr
+
 Type: `function`
 
 The xhr function that is used by VHS internally is exposed on the per-
@@ -654,34 +703,36 @@ hooks are ready to be added or removed. This will ensure player specific hooks a
 set prior to any manifest or segment requests.
 
 The `onRequest(callback)` function takes a `callback` function that will pass an xhr `options`
-Object to that callback. These callbacks are called synchronously, in the order registered 
+Object to that callback. These callbacks are called synchronously, in the order registered
 and act as pre-request hooks for modifying the xhr `options` Object prior to making a request.
 
-Note: This callback *MUST* return an `options` Object as the `xhr` wrapper and each `onRequest`
+Note: This callback _MUST_ return an `options` Object as the `xhr` wrapper and each `onRequest`
 hook receives the returned `options` as a parameter.
 
 Example:
+
 ```javascript
-player.on('xhr-hooks-ready', () => {
+player.on("xhr-hooks-ready", () => {
   const playerRequestHook = (options) => {
     return {
-      uri: 'https://new.options.uri'
+      uri: "https://new.options.uri",
     };
   };
   player.tech().vhs.xhr.onRequest(playerRequestHook);
 });
 ```
 
-If access to the `xhr` Object is required prior to the `xhr.send` call, an `options.beforeSend` 
-callback can be set within an `onRequest` callback function that will pass the `xhr` Object 
+If access to the `xhr` Object is required prior to the `xhr.send` call, an `options.beforeSend`
+callback can be set within an `onRequest` callback function that will pass the `xhr` Object
 as a parameter and will be called immediately prior to `xhr.send`.
 
 Example:
+
 ```javascript
-player.on('xhr-hooks-ready', () => {
+player.on("xhr-hooks-ready", () => {
   const playerXhrRequestHook = (options) => {
     options.beforeSend = (xhr) => {
-      xhr.setRequestHeader('foo', 'bar');
+      xhr.setRequestHeader("foo", "bar");
     };
     return options;
   };
@@ -696,8 +747,9 @@ xhr `request`, `error` and `response` Objects. `onResponse` callbacks do not req
 return value, the parameters are passed to each subsequent callback by reference.
 
 Example:
+
 ```javascript
-player.on('xhr-hooks-ready', () => {
+player.on("xhr-hooks-ready", () => {
   const playerResponseHook = (request, error, response) => {
     const bar = response.headers.foo;
   };
@@ -709,8 +761,9 @@ The `offRequest` function takes a `callback` function, and will remove that func
 the collection of `onRequest` hooks if it exists.
 
 Example:
+
 ```javascript
-player.on('xhr-hooks-ready', () => {
+player.on("xhr-hooks-ready", () => {
   player.tech().vhs.xhr.offRequest(playerRequestHook);
 });
 ```
@@ -719,24 +772,26 @@ The `offResponse` function takes a `callback` function, and will remove that fun
 the collection of `offResponse` hooks if it exists.
 
 Example:
+
 ```javascript
-player.on('xhr-hooks-ready', () => {
+player.on("xhr-hooks-ready", () => {
   player.tech().vhs.xhr.offResponse(playerResponseHook);
 });
 ```
 
 The global `videojs.Vhs` also exposes an `xhr` property. Adding `onRequest`
 and/or `onResponse` hooks will allow you to intercept the request options and xhr
-Object as well as request, error, and response data for *all* requests in *every*
+Object as well as request, error, and response data for _all_ requests in _every_
 player on a page. For consistency across browsers the video source should be set
 at runtime once the video player is ready.
 
 Example:
+
 ```javascript
 // Global request callback, will affect every player.
 const globalRequestHook = (options) => {
   return {
-    uri: 'https://new.options.global.uri'
+    uri: "https://new.options.global.uri",
   };
 };
 videojs.Vhs.xhr.onRequest(globalRequestHook);
@@ -746,7 +801,7 @@ videojs.Vhs.xhr.onRequest(globalRequestHook);
 // Global request callback defining beforeSend function, will affect every player.
 const globalXhrRequestHook = (options) => {
   options.beforeSend = (xhr) => {
-    xhr.setRequestHeader('foo', 'bar');
+    xhr.setRequestHeader("foo", "bar");
   };
   return options;
 };
@@ -756,7 +811,7 @@ videojs.Vhs.xhr.onRequest(globalXhrRequestHook);
 ```javascript
 // Global response hook callback, will affect every player.
 const globalResponseHook = (request, error, response) => {
-  const bar = response.headers.foo
+  const bar = response.headers.foo;
 };
 
 videojs.Vhs.xhr.onResponse(globalResponseHook);
@@ -776,33 +831,34 @@ For information on the type of options that you can modify see the
 documentation at [https://github.com/Raynos/xhr](https://github.com/Raynos/xhr).
 
 #### vhs.stats
+
 Type: `object`
 
 This object contains a summary of HLS and player related stats.
 
-| Property Name         | Type   | Description |
-| --------------------- | ------ | ----------- |
-| bandwidth             | number | Rate of the last segment download in bits/second |
-| mediaRequests         | number | Total number of media segment requests |
-| mediaRequestsAborted  | number | Total number of aborted media segment requests |
-| mediaRequestsTimedout | number | Total number of timedout media segment requests |
-| mediaRequestsErrored  | number | Total number of errored media segment requests |
-| mediaTransferDuration | number | Total time spent downloading media segments in milliseconds |
-| mediaBytesTransferred | number | Total number of content bytes downloaded |
-| mediaSecondsLoaded    | number | Total number of content seconds downloaded |
-| buffered              | array  | List of time ranges of content that are in the SourceBuffer |
-| currentTime           | number | The current position of the player |
-| currentSource         | object | The source object. Has the structure `{src: 'url', type: 'mimetype'}` |
-| currentTech           | string | The name of the tech in use |
-| duration              | number | Duration of the video in seconds |
-| main                  | object | The [main playlist object](#vhsplaylistsmain) |
-| playerDimensions      | object | Contains the width and height of the player |
-| seekable              | array  | List of time ranges that the player can seek to |
-| timestamp             | number | Timestamp of when `vhs.stats` was accessed |
+| Property Name         | Type   | Description                                                                                                                           |
+| --------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| bandwidth             | number | Rate of the last segment download in bits/second                                                                                      |
+| mediaRequests         | number | Total number of media segment requests                                                                                                |
+| mediaRequestsAborted  | number | Total number of aborted media segment requests                                                                                        |
+| mediaRequestsTimedout | number | Total number of timedout media segment requests                                                                                       |
+| mediaRequestsErrored  | number | Total number of errored media segment requests                                                                                        |
+| mediaTransferDuration | number | Total time spent downloading media segments in milliseconds                                                                           |
+| mediaBytesTransferred | number | Total number of content bytes downloaded                                                                                              |
+| mediaSecondsLoaded    | number | Total number of content seconds downloaded                                                                                            |
+| buffered              | array  | List of time ranges of content that are in the SourceBuffer                                                                           |
+| currentTime           | number | The current position of the player                                                                                                    |
+| currentSource         | object | The source object. Has the structure `{src: 'url', type: 'mimetype'}`                                                                 |
+| currentTech           | string | The name of the tech in use                                                                                                           |
+| duration              | number | Duration of the video in seconds                                                                                                      |
+| main                  | object | The [main playlist object](#vhsplaylistsmain)                                                                                         |
+| playerDimensions      | object | Contains the width and height of the player                                                                                           |
+| seekable              | array  | List of time ranges that the player can seek to                                                                                       |
+| timestamp             | number | Timestamp of when `vhs.stats` was accessed                                                                                            |
 | videoPlaybackQuality  | object | Media playback quality metrics as specified by the [W3C's Media Playback Quality API](https://wicg.github.io/media-playback-quality/) |
 
-
 ### Events
+
 Standard HTML video events are handled by video.js automatically and
 are triggered on the player object.
 
@@ -833,8 +889,8 @@ events, which are triggered on the player.
 To listen for usage events triggered on the tech, listen for the event type of `'usage'`:
 
 ```javascript
-player.on('ready', () => {
-  player.tech().on('usage', (e) => {
+player.on("ready", () => {
+  player.tech().on("usage", (e) => {
     console.log(e.name);
   });
 });
@@ -848,39 +904,39 @@ manifest is downloaded and parsed, and will not be triggered again.
 
 Each of the following usage events are fired once per source if (and when) detected:
 
-| Name          | Description   |
-| ------------- | ------------- |
-| vhs-webvtt    | main manifest has at least one segmented WebVTT playlist |
-| vhs-aes       | a playlist is AES encrypted |
-| vhs-fmp4      | a playlist used fMP4 segments |
-| vhs-demuxed   | audio and video are demuxed by default |
-| vhs-alternate-audio | alternate audio available in the main manifest |
-| vhs-playlist-cue-tags | a playlist used cue tags (see useCueTags(#usecuetags) for details) |
-| vhs-bandwidth-from-local-storage | starting bandwidth was retrieved from local storage (see useBandwidthFromLocalStorage(#useBandwidthFromLocalStorage) for details) |
+| Name                              | Description                                                                                                                        |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| vhs-webvtt                        | main manifest has at least one segmented WebVTT playlist                                                                           |
+| vhs-aes                           | a playlist is AES encrypted                                                                                                        |
+| vhs-fmp4                          | a playlist used fMP4 segments                                                                                                      |
+| vhs-demuxed                       | audio and video are demuxed by default                                                                                             |
+| vhs-alternate-audio               | alternate audio available in the main manifest                                                                                     |
+| vhs-playlist-cue-tags             | a playlist used cue tags (see useCueTags(#usecuetags) for details)                                                                 |
+| vhs-bandwidth-from-local-storage  | starting bandwidth was retrieved from local storage (see useBandwidthFromLocalStorage(#useBandwidthFromLocalStorage) for details)  |
 | vhs-throughput-from-local-storage | starting throughput was retrieved from local storage (see useBandwidthFromLocalStorage(#useBandwidthFromLocalStorage) for details) |
 
 #### Use Stats
 
 Each of the following usage events are fired per use:
 
-| Name          | Description   |
-| ------------- | ------------- |
-| vhs-gap-skip  | player skipped a gap in the buffer |
-| vhs-player-access | player.vhs was accessed |
-| vhs-audio-change | a user selected an alternate audio stream |
-| vhs-rendition-disabled | a rendition was disabled |
-| vhs-rendition-enabled | a rendition was enabled |
-| vhs-rendition-excluded| a rendition was excluded |
-| vhs-timestamp-offset | a timestamp offset was set in HLS (can identify discontinuities) |
-| vhs-unknown-waiting | the player stopped for an unknown reason and we seeked to current time try to address it |
-| vhs-live-resync | playback fell off the back of a live playlist and we resynced to the live point |
-| vhs-video-underflow | we seeked to current time to address video underflow |
-| vhs-error-reload-initialized | the reloadSourceOnError plugin was initialized |
-| vhs-error-reload | the reloadSourceOnError plugin reloaded a source |
-| vhs-error-reload-canceled | an error occurred too soon after the last reload, so we didn't reload again (to prevent error loops) |
-
+| Name                         | Description                                                                                          |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------- |
+| vhs-gap-skip                 | player skipped a gap in the buffer                                                                   |
+| vhs-player-access            | player.vhs was accessed                                                                              |
+| vhs-audio-change             | a user selected an alternate audio stream                                                            |
+| vhs-rendition-disabled       | a rendition was disabled                                                                             |
+| vhs-rendition-enabled        | a rendition was enabled                                                                              |
+| vhs-rendition-excluded       | a rendition was excluded                                                                             |
+| vhs-timestamp-offset         | a timestamp offset was set in HLS (can identify discontinuities)                                     |
+| vhs-unknown-waiting          | the player stopped for an unknown reason and we seeked to current time try to address it             |
+| vhs-live-resync              | playback fell off the back of a live playlist and we resynced to the live point                      |
+| vhs-video-underflow          | we seeked to current time to address video underflow                                                 |
+| vhs-error-reload-initialized | the reloadSourceOnError plugin was initialized                                                       |
+| vhs-error-reload             | the reloadSourceOnError plugin reloaded a source                                                     |
+| vhs-error-reload-canceled    | an error occurred too soon after the last reload, so we didn't reload again (to prevent error loops) |
 
 ### In-Band Metadata
+
 The HLS tech supports [timed
 metadata](https://developer.apple.com/library/ios/#documentation/AudioVideo/Conceptual/HTTP_Live_Streaming_Metadata_Spec/Introduction/Introduction.html)
 embedded as [ID3 tags](http://id3.org/id3v2.3.0). When a stream is
@@ -895,13 +951,14 @@ text. Cues are created for all other frame types and the data is
 attached to the generated cue:
 
 ```javascript
-cue.value.data
+cue.value.data;
 ```
 
 There are lots of guides and references to using text tracks [around
 the web](http://www.html5rocks.com/en/tutorials/track/basics/).
 
 ### Segment Metadata
+
 You can get metadata about the segments currently in the buffer by using the `segment-metadata`
 text track. You can get the metadata of the currently rendered segment by looking at the
 track's `activeCues` array. The metadata will be attached to the `cue.value` property and
@@ -917,18 +974,19 @@ cue.value = {
   timeline, // Timeline of the segment for detecting discontinuities
   playlist, // The Playlist uri
   start, // Segment start time
-  end // Segment end time
+  end, // Segment end time
 };
 ```
 
 Example:
 Detect when a change in quality is rendered on screen
+
 ```javascript
 let tracks = player.textTracks();
 let segmentMetadataTrack;
 
 for (let i = 0; i < tracks.length; i++) {
-  if (tracks[i].label === 'segment-metadata') {
+  if (tracks[i].label === "segment-metadata") {
     segmentMetadataTrack = tracks[i];
   }
 }
@@ -936,13 +994,17 @@ for (let i = 0; i < tracks.length; i++) {
 let previousPlaylist;
 
 if (segmentMetadataTrack) {
-  segmentMetadataTrack.on('cuechange', function() {
+  segmentMetadataTrack.on("cuechange", function () {
     let activeCue = segmentMetadataTrack.activeCues[0];
 
     if (activeCue) {
       if (previousPlaylist !== activeCue.value.playlist) {
-        console.log('Switched from rendition ' + previousPlaylist +
-                    ' to rendition ' + activeCue.value.playlist);
+        console.log(
+          "Switched from rendition " +
+            previousPlaylist +
+            " to rendition " +
+            activeCue.value.playlist
+        );
       }
       previousPlaylist = activeCue.value.playlist;
     }
@@ -950,9 +1012,31 @@ if (segmentMetadataTrack) {
 }
 ```
 
+### SEI Metadata
+
+You can get the segment's SEI data by listening to the `seidata` event. Example:
+
+```
+var tech = player.tech();
+tech.on("seidata", (event) => {
+  console.log(event.data);
+})
+```
+
+`event.data` is an array with all SEI from the segment. The SEI data is of the form:
+
+```
+{
+  pts: [number],
+  payloadType: [number],
+  payloadSize: [number],
+  payload: [Uint8Array]
+}
+```
+
 ### Object as Source
 
-*Note* that this is an advanced use-case, and may be more fragile for production
+_Note_ that this is an advanced use-case, and may be more fragile for production
 environments, as the schema for a VHS object and how it's used internally are not set in
 stone and may change in future releases.
 
@@ -960,8 +1044,9 @@ In normal use, VHS accepts a URL as the source of the video. But VHS also has th
 to accept a JSON object as the source.
 
 Passing a JSON object as the source has many uses. A couple of examples include:
-* The manifest has already been downloaded, so there's no need to make another request
-* You want to change some aspect of the manifest, e.g., add a segment, without modifying
+
+- The manifest has already been downloaded, so there's no need to make another request
+- You want to change some aspect of the manifest, e.g., add a segment, without modifying
   the manifest itself
 
 In order to pass a JSON object as the source, provide a parsed manifest object in via a
@@ -988,6 +1073,7 @@ and informally documented structure) provided in the README of
 project as `vhs-json`.
 
 ## Hosting Considerations
+
 Unlike a native HLS implementation, the HLS tech has to comply with
 the browser's security policies. That means that all the files that
 make up the stream must be served from the same domain as the page
@@ -997,12 +1083,13 @@ configured. Easy [instructions are
 available](http://enable-cors.org/server.html) for popular webservers
 and most CDNs should have no trouble turning CORS on for your account.
 
-
 ## Known Issues and Workarounds
+
 Issues that are currenty known. If you want to
 help find a solution that would be appreciated!
 
 ### Fragmented MP4 Support
+
 Edge has native support for HLS but only in the MPEG2-TS container. If
 you attempt to play an HLS stream with fragmented MP4 segments (without
 [overriding native playback](#overridenative)), Edge will stall.
@@ -1010,6 +1097,7 @@ Fragmented MP4s are only supported on browsers that have
 [Media Source Extensions](http://caniuse.com/#feat=mediasource) available.
 
 ### Assets with an Audio-Only Rate Get Stuck in Audio-Only
+
 Some assets which have an audio-only rate and the lowest-bandwidth
 audio + video rate isn't that low get stuck in audio-only mode. This is
 because the initial bandwidth calculation thinks it there's insufficient
@@ -1059,13 +1147,15 @@ log level is not set to `debug`.
 a snapshot summary of various HLS and player stats. See [vhs.stats](#vhsstats) for details
 about what this object contains.
 
-__NOTE__: The `debug` level is only available in video.js v6.6.0+. With earlier versions of
+**NOTE**: The `debug` level is only available in video.js v6.6.0+. With earlier versions of
 video.js, no debug messages will be logged to console.
 
 ## Release History
+
 Check out the [changelog](CHANGELOG.md) for a summary of each release.
 
 ## Building
+
 To build a copy of videojs-http-streaming run the following commands
 
 ```bash
@@ -1080,12 +1170,15 @@ videojs-http-streaming will have created all of the files for using it in a dist
 ## Development
 
 ### Tools
-* Download stream locally with the [HLS Fetcher](https://github.com/videojs/hls-fetcher)
-* Simulate errors with [Murphy](https://github.com/videojs/murphy)
-* Inspect content with [Thumbcoil](http://thumb.co.il)
+
+- Download stream locally with the [HLS Fetcher](https://github.com/videojs/hls-fetcher)
+- Simulate errors with [Murphy](https://github.com/videojs/murphy)
+- Inspect content with [Thumbcoil](http://thumb.co.il)
 
 ### Commands
+
 All commands for development are listed in the `package.json` file and are run using
+
 ```bash
 npm run <command>
 ```
