@@ -1,3 +1,18 @@
+<a name="3.17.2"></a>
+## [3.17.2](https://github.com/videojs/http-streaming/compare/v3.17.1...v3.17.2) (2025-07-22)
+
+### Bug Fixes
+
+* add release workflow permissions ([#1584](https://github.com/videojs/http-streaming/issues/1584)) ([33c61b7](https://github.com/videojs/http-streaming/commit/33c61b7))
+
+<a name="3.17.1"></a>
+## [3.17.1](https://github.com/videojs/http-streaming/compare/v3.17.0...v3.17.1) (2025-07-22)
+
+### Bug Fixes
+
+* correct errorMetadata property name from 'erroType' to 'errorType' ([#1568](https://github.com/videojs/http-streaming/issues/1568)) ([1e721c1](https://github.com/videojs/http-streaming/commit/1e721c1))
+* prevent errors in getKeyIdSet if `playlist.contentProtection` object is incomplete ([#1582](https://github.com/videojs/http-streaming/issues/1582)) ([7bc7033](https://github.com/videojs/http-streaming/commit/7bc7033))
+
 <a name="3.17.0"></a>
 # [3.17.0](https://github.com/videojs/http-streaming/compare/v3.16.2...v3.17.0) (2025-02-05)
 
