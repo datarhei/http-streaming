@@ -1,4 +1,4 @@
-/*! @name @videojs/http-streaming @version 3.17.0 @license Apache-2.0 */
+/*! @name @videojs/http-streaming @version 3.17.2 @license Apache-2.0 */
 import _extends from '@babel/runtime/helpers/extends';
 import document from 'global/document';
 import window$1 from 'global/window';
@@ -2911,16 +2911,17 @@ class PlaylistLoader extends EventTarget$1 {
    * @return a Set of 32 digit hex strings that represent the unique keyIds for that playlist.
    */
   getKeyIdSet(playlist) {
-    if (playlist.contentProtection) {
-      const keyIds = new Set();
-      for (const keysystem in playlist.contentProtection) {
-        const keyId = playlist.contentProtection[keysystem].attributes.keyId;
-        if (keyId) {
-          keyIds.add(keyId.toLowerCase());
-        }
-      }
+    const keyIds = new Set();
+    if (!playlist || !playlist.contentProtection) {
       return keyIds;
     }
+    for (const keysystem in playlist.contentProtection) {
+      if (playlist.contentProtection[keysystem] && playlist.contentProtection[keysystem].attributes && playlist.contentProtection[keysystem].attributes.keyId) {
+        const keyId = playlist.contentProtection[keysystem].attributes.keyId;
+        keyIds.add(keyId.toLowerCase());
+      }
+    }
+    return keyIds;
   }
 }
 
@@ -27957,7 +27958,7 @@ const reloadSourceOnError = function (options) {
   initPlugin(this, options);
 };
 
-var version$4 = "3.17.0";
+var version$4 = "3.17.2";
 
 var version$3 = "7.1.0";
 

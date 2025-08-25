@@ -1,4 +1,4 @@
-/*! @name @videojs/http-streaming @version 3.17.0 @license Apache-2.0 */
+/*! @name @videojs/http-streaming @version 3.17.2 @license Apache-2.0 */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('video.js'), require('@xmldom/xmldom')) :
   typeof define === 'function' && define.amd ? define(['exports', 'video.js', '@xmldom/xmldom'], factory) :
@@ -4852,16 +4852,17 @@
      * @return a Set of 32 digit hex strings that represent the unique keyIds for that playlist.
      */
     getKeyIdSet(playlist) {
-      if (playlist.contentProtection) {
-        const keyIds = new Set();
-        for (const keysystem in playlist.contentProtection) {
-          const keyId = playlist.contentProtection[keysystem].attributes.keyId;
-          if (keyId) {
-            keyIds.add(keyId.toLowerCase());
-          }
-        }
+      const keyIds = new Set();
+      if (!playlist || !playlist.contentProtection) {
         return keyIds;
       }
+      for (const keysystem in playlist.contentProtection) {
+        if (playlist.contentProtection[keysystem] && playlist.contentProtection[keysystem].attributes && playlist.contentProtection[keysystem].attributes.keyId) {
+          const keyId = playlist.contentProtection[keysystem].attributes.keyId;
+          keyIds.add(keyId.toLowerCase());
+        }
+      }
+      return keyIds;
     }
   }
 
@@ -34435,7 +34436,7 @@ ${segmentInfoString(segmentInfo)}`);
     initPlugin(this, options);
   };
 
-  var version$4 = "3.17.0";
+  var version$4 = "3.17.2";
 
   var version$3 = "7.1.0";
 
